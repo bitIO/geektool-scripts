@@ -10,11 +10,12 @@
 require 'rubygems'
 require 'sqlite3'
 # ##########################################
-# If you are getting errors on the above line then you do not have sqlite3
-# installed correctly no matter what gem is telling you. You probably have more
-# than one version of ruby installed and gem is pointing to a different one than
-# geektool.
-# See the following page for details:
+# If you are getting errors on the above line
+# then you do not have sqlite3 installed correctly
+# no matter what gem is telling you. You probably have
+# more than one version of ruby installed and
+# gem is pointing to a different one than geeltool.
+# see the following page for details:
 # http://stackoverflow.com/questions/2797020/ruby-gem-not-found-although-it-is-installed
 # ###########################################
 
@@ -23,8 +24,7 @@ def relative_indented(str)
   str.gsub /^#{leading_whitespace}/ , String.new
 end
 
-db = SQLite3::Database.new( "~/Library/Wunderlist/wunderlist.db" )
-
+db = SQLite3::Database.new( "/Library/Containers/com.wunderkinder.wunderlistdesktop/Data/Library/Application Support/Wunderlist/WKModel.sqlite");
 db.results_as_hash = true # results returned as a hash, rather than an ordered array
 db.type_translation = true # results resurned as their native types (according to the column definition) rather than String
 
@@ -36,22 +36,22 @@ ESCAPE_NOTE_MARKUP = "\033[3m"          # defaults to italic
 ESCAPE_CANCEL = "\033[0m"               # resets all text atributes you may have set
 INDENT = "     "
 
-db.execute("select id, name, position from lists where deleted = '0' order by position") do |list|
+db.execute("select Z_PK, ZTITLE from ZRESOURCE where  ZTASKLIST IS NULL AND Z_ENT = 6 ORDER BY ZORDERINDEXDOUBLE") do |list|
     printedHeader = false
-    db.execute("select id, date, name, note, important, position from tasks where deleted = 0 and done = 0 and list_id = ? order by date DESC, important DESC, position", list['id']) do |task|
+    db.execute("select ZTITLE, ZNOTE, ZSTARRED, ZDUEDATE, ZCREATEDAT from ZRESOURCE where ZTASKLIST=? and ZCOMPLETEDAT is NULL ORDER BY ZORDERINDEXDOUBLE", list['Z_PK']) do |task|
 
         # There is a task associated with this list, so print the header
         if (printedHeader == false) then
             puts
-            puts ESCAPE_PROJECT_NAME_MARKUP + '[LIST] ' + ESCAPE_LIST_TITLE + list['name'] + ESCAPE_CANCEL  # this prints a header
+            puts ESCAPE_PROJECT_NAME_MARKUP + '[LIST] ' + ESCAPE_LIST_TITLE + list['ZTITLE'] + ESCAPE_CANCEL  # this prints a header
             printedHeader = true
         end
 
         taskToOutput = "[TASK] "
 
         # if there is a date, print it before the name of the task
-        if (task['date'] != 0 ) then
-            date = Time.at(task['date'])
+        if (!task['ZDUEDATE'].nil? && task['ZDUEDATE'] != 0 ) then
+            date = Time.at(task['ZDUEDATE'])
             today = Time.new
 
             #if the date is in the past, print the date in red
@@ -64,18 +64,18 @@ db.execute("select id, name, position from lists where deleted = '0' order by po
             taskToOutput += INDENT
         end
 
-        if (task['important'] == 1) then
+        if (task['ZSTARRED'] == 1) then
           taskToOutput += ESCAPE_IMPORTANT_COLOR + "★ " + ESCAPE_CANCEL
         end
-        taskToOutput += task['name']
+        taskToOutput += task['ZTITLE']
 
         puts taskToOutput
 
         # if there is a note, print it in italics
-        if (!task['note'].nil? && task['note'].length > 0) then
+        if (!task['ZNOTE'].nil? && task['ZNOTE'].length > 0) then
           #puts INDENT + INDENT + ESCAPE_NOTE_MARKUP + task['note'] + ESCAPE_CANCEL
           #puts ESCAPE_NOTE_MARKUP + task['note'] + ESCAPE_CANCEL
-          lines = task['note'].each_line
+          lines = task['ZNOTE'].each_line
           lines.each { |line| print INDENT + INDENT + INDENT + ESCAPE_NOTE_MARKUP + line }
           puts ESCAPE_CANCEL
         end # end if (is there a task note)
