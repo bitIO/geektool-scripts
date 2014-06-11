@@ -1,5 +1,5 @@
 # setup
-RUNDIR=/Users/bit_jammer/Development/geektool/yahooweather
+RUNDIR=/Users/bit_jammer/Development/git/mine/geektool-scripts/yahooweather
 MADRIDWEATHER=http://es.tiempo.yahoo.com/espa%C3%B1a/comunidad-de-madrid/madrid-766273/
 
 #rm -f $RUNDIR/yahooweather.png $RUNDIR/termic $RUNDIR/wind $RUNDIR/humnidity $RUNDIR/sun*
@@ -7,11 +7,11 @@ rm -f $RUNDIR/termic $RUNDIR/wind $RUNDIR/humnidity $RUNDIR/sun*
 
 cd $RUNDIR
 
-curl -s $MADRIDWEATHER > output.html
+curl -s -L $MADRIDWEATHER > output.html
 #
 # search for the png
 #
-line=`cat output.html | grep 'class="current-weather"' | cut -d'(' -f2 | cut -d')' -f1 | sed "s/'//g"`
+line=`cat output.html | grep 'class="current-weather"' | cut -d'(' -f3 | cut -d')' -f1 | sed "s/,.*$//g" | sed "s/'//g" | cut -d'=' -f2`
 # echo step1: $line
 # line=${line##*http}
 # echo step2: $line
@@ -20,7 +20,7 @@ line=`cat output.html | grep 'class="current-weather"' | cut -d'(' -f2 | cut -d'
 # line=`echo http$line`
 # echo step4: $line
 #wget -O $RUNDIR/yahooweather.png --quiet $line
-/opt/local/bin/wget -O $RUNDIR/yahooweather.png --quiet $line
+curl -s $line > yahooweather.png
 
 #
 # search for the information provided in text mode
