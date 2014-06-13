@@ -39,7 +39,7 @@ echo "Vientos de $line" > $RUNDIR/wind
 line=${sourceline##*Humedad}
 line=${line#*detail-text\">}
 line=${line%%<*}
-echo "Humedad relativa del $line%" > $RUNDIR/humidity
+echo "Humedad relativa del $line" > $RUNDIR/humidity
 
 line=${sourceline##*Salida del sol}
 line=${line#*detail-text\">}
